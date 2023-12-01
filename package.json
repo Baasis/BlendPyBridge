@@ -1,0 +1,98 @@
+{
+  "name": "blendpybridge",
+  "displayName": "BlendPyBridge",
+  "description": "Создаёт программпый мост между Blender и терминалом, используя socket для прослушивания отдельных команд, целых скриптов или даже многофайловых аддонов от клиента",
+  "author": {
+		"name": "Andrei Zhitkov - Baasis - Andy"
+	},
+  "publisher": "Andrei Zhitkov",
+  "version": "0.1.2",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "blender",
+    "bridge",
+    "socket",
+    "sync",
+    "dev"
+  ],
+  "pricing": "Free",
+  "icon": "images/icons.png",
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+			{
+        "category": "BlendPyBridge",
+        "title": "Start Blender with socket server",
+				"command": "blendpybridge.start"
+			},
+      {
+        "category": "BlendPyBridge",
+        "title": "Select Blender Executable",
+				"command": "blendpybridge.selectBlenderExecutable"
+			},
+      {
+				"category": "BlendPyBridge",
+        "title": "Clean Path Blender",
+        "command": "blendpybridge.cleanPathBlender"
+			},
+      {
+				"category": "BlendPyBridge",
+        "title": "Print Path Blender & Python EXE",
+        "command": "blendpybridge.showPaths"
+			},
+      {
+				"category": "BlendPyBridge",
+        "title": "Show Active File Path",
+        "command": "blendpybridge.showActivePyFilePath"
+			},
+      {
+				"category": "BlendPyBridge",
+        "title": "Send Command To Blender",
+        "command": "blendpybridge.sendCommandToBlender"
+			},
+			{
+        "category": "BlendPyBridge",
+        "title": "Only Send",
+				"command": "blendpybridge.onlylisten"
+			}
+    ]
+  },
+  "extensionDependencies": [
+		"ms-python.python"
+	],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.84.0",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.2.2",
+    "@vscode/test-electron": "^2.3.6"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://github.com/.../.../issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/.../....git"
+  },
+  "homepage": "https://github.com/.../.../.../main/README.md"
+}
