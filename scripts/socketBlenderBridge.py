@@ -1,11 +1,36 @@
+# Файл запускается Blender-ом при старте
+# blender --python self_script.py
+
 import sys
 import time
 import socket
+import marshal
 import threading
 
 import bpy
 
 
+
+def handle_data(data):
+    # Проверка типа данных
+    if data.startswith(b'TEXT:'):
+        print('Получена - command')
+        # Обработка текстовых данных
+        command = data[5:].decode('utf-8')
+        exec(command)
+    elif data.startswith(b'MARSHAL:'):
+        print('Получен - MARSHAL')
+        # Обработка маршализованных данных
+        marshaled_data = data[8:]
+        demarsh = marshal.loads(marshaled_data)
+        exec(demarsh)
+    else:
+        print("Неизвестный тип данных")
+
+
+
+
+# Собственно сам слушайющий сервер
 def start_server(port=3264):
     # Создает сокет, AF_INET - сетевой сокет (IPv4), SOCK_STREAM - сокет TCP
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,16 +50,39 @@ def start_server(port=3264):
             while True:
                 # Получает данные от клиента
                 part = client_sock.recv(4096)
-                data_parts.append(part)
-                # Ждем все части сообщения пока не придет остаточное сообщение
-                if len(part) < 4096:
+                # Если часть пустая, значит все данные получены
+                if not part:
                     break
+                data_parts.append(part)
+            # Склеиваем бинарные данные
             data = b''.join(data_parts)
+
+            handle_data(data)
+
+            # print('RAW')
+            # print(data)
+
+            # demarsh = marshal.loads(data)
             
+            # print('Демарш')
+            # print(data)
+            
+            # print("Размер полученных данных:", len(data))
+            # print('post_demarsh')
+                                            
             # Декодирует полученные байты данных
-            command = data.decode('utf-8')
+            # command = data.decode('utf-8')
+            # print('Декод')
+            # print(command)
+            
             # Выполняет строку как Python код
-            exec(command)
+            # print('Демарш:', data)
+
+
+            # exec(command)
+
+
+            # exec(data)
             # Обновляет текущий видовой слой в Blender, что необходимо
             bpy.context.view_layer.update()
         except Exception as e:
@@ -44,6 +92,7 @@ def start_server(port=3264):
             client_sock.close()
 
 
+# Аварийная самовырубалка процесса, на случай зависания или специфического вылета Blender
 def check_blender_status():
     start_time = time.time()
     while True:
@@ -55,12 +104,12 @@ def check_blender_status():
             elapsed_time = time.time() - start_time
             print(f'RUN: {int(elapsed_time)} секунд')
         except Exception as e:
-            print('Останавка сервера:', e)
+            print('Остановка сервера:', e)
             sys.exit(0)
         time.sleep(4)
 
 
-
+# Господа демоны-процессы
 def server_run():
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()

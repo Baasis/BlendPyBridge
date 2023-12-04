@@ -1,0 +1,35 @@
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.start.title%",
+        "command": "blendpybridge.start"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.selectBlenderExecutable.title%",
+        "command": "blendpybridge.selectBlenderExecutable"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.cleanPathBlender.title%",
+        "command": "blendpybridge.cleanPathBlender"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.showPaths.title%",
+        "command": "blendpybridge.showPaths"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.showActivePyFilePath.title%",
+        "command": "blendpybridge.showActivePyFilePath"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.sendCommandToBlender.title%",
+        "command": "blendpybridge.sendCommandToBlender"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%blendpybridge.onlylisten.title%",
+        "command": "blendpybridge.onlylisten"
+      }

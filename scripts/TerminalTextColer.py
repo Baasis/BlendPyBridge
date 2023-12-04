@@ -15,7 +15,7 @@ class ColTerm:
 
 # Тексты заголовков
 def terminal_print_header(text, color='\033[95m', total_length=32, space_length=8, hash_char='#', s='', f=''):
-    text_colored = f' {color}{text}{'\033[0m'} '
+    text_colored = f' {color}{text}\033[0m '
     hash_length = (total_length - len(text)) // 2
     ender = hash_length + 1 if (hash_length * 2 + len(text)) % 2 == 1 else hash_length
     # Собираем строку

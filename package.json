@@ -28,37 +28,37 @@
     "commands": [
 			{
         "category": "BlendPyBridge",
-        "title": "Start Blender with socket server",
+        "title": "%command.start.title%",
 				"command": "blendpybridge.start"
 			},
       {
         "category": "BlendPyBridge",
-        "title": "Select Blender Executable",
+        "title": "%command.selectBlenderExecutable.title%",
 				"command": "blendpybridge.selectBlenderExecutable"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "Clean Path Blender",
+        "title": "%command.cleanPathBlender.title%",
         "command": "blendpybridge.cleanPathBlender"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "Print Path Blender & Python EXE",
+        "title": "%command.showPaths.title%",
         "command": "blendpybridge.showPaths"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "Show Active File Path",
+        "title": "%command.showActivePyFilePath.title%",
         "command": "blendpybridge.showActivePyFilePath"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "Send Command To Blender",
+        "title": "%command.sendCommandToBlender.title%",
         "command": "blendpybridge.sendCommandToBlender"
 			},
 			{
         "category": "BlendPyBridge",
-        "title": "Only Send",
+        "title": "%command.onlylisten.title%",
 				"command": "blendpybridge.onlylisten"
 			}
     ]

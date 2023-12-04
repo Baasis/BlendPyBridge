@@ -1,15 +1,15 @@
 import os
 import sys
 
-# addon_path = 'D:\WORK\GAYAPyProject\GAYA_Generators'
-# addons_folder, addon_name = os.path.split(addon_path)
+addon_path = 'D:\WORK\GAYAPyProject\GAYA_Generators'
+addons_folder, addon_name = os.path.split(addon_path)
 
 init_path = '__init__.py'
 
-# if addons_folder not in sys.path:
-#     sys.path.append(addons_folder)
+if addons_folder not in sys.path:
+    sys.path.append(addons_folder)
 
-# exec_code_path = os.path.join(addon_path, init_path)
+exec_code_path = os.path.join(addon_path, init_path)
 
 # Путь к запускамому коду?
 exec_code_path = ''

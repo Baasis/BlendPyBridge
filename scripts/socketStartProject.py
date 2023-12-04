@@ -24,8 +24,8 @@ print(f'{ColTerm.WARNING}Текущий рабочий каталог:{ColTerm.E
 
 # Путь к Blender, передаётся первым аргмуентом
 if len(sys.argv) > 1:
-    print('*'*50)
-    print(sys.argv[1])
+    # print('*'*50)
+    # print(sys.argv[1])
     path_blender = sys.argv[1]
     # Используйте path_blender в вашем скрипте
 else:
@@ -54,8 +54,8 @@ else:
 
 
 # Запуск Blender как подпроцесса
-# process_blender = subprocess.Popen([path_blender, "--python", full_path_server], stdout=None, stderr=None)
-process_blender = subprocess.Popen(path_blender, stdout=None, stderr=None)
+process_blender = subprocess.Popen([path_blender, "--python", full_path_server], stdout=None, stderr=None)
+# process_blender = subprocess.Popen(path_blender, stdout=None, stderr=None)
 
 # Вариант с перехватом и форматированием вывода Blender, он глючит из-за буфера
 # process_blender = subprocess.Popen([path_blender, "--python", full_path_server], stdout=subprocess.PIPE)
