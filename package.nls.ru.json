@@ -1,8 +1,8 @@
 {
 	"command.start.title": "Запустить Blender с сервером сокетов",
-	"command.selectBlenderExecutable.title": "Выбрать исполняемый файл Blender",
-	"command.cleanPathBlender.title": "Очистить путь к Blender",
-	"command.showPaths.title": "Показать пути к Blender и Python EXE",
+	"command.pathExecSel.title": "Выбрать исполняемый файл Blender",
+	"command.pathExecClean.title": "Очистить путь к Blender",
+	"command.pathExecShow.title": "Показать пути к Blender и Python EXE",
 	"command.showActivePyFilePath.title": "Показать путь к активному файлу",
 	"command.sendCommandToBlender.title": "Отправить команду в Blender",
 	"command.onlylisten.title": "Только отправить"

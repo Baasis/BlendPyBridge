@@ -1,8 +1,8 @@
 {
     "command.start.title": "Start Blender with socket server",
-    "command.selectBlenderExecutable.title": "Select Blender Executable",
-    "command.cleanPathBlender.title": "Clean Path Blender",
-    "command.showPaths.title": "Print Path Blender & Python EXE",
+    "command.pathExecSel.title": "Select Blender Executable",
+    "command.pathExecClean.title": "Clean Path Blender",
+    "command.pathExecShow.title": "Print Path Blender & Python EXE",
     "command.showActivePyFilePath.title": "Show Active File Path",
     "command.sendCommandToBlender.title": "Send Command To Blender",
     "command.onlylisten.title": "Only Send"

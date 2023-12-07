@@ -10,26 +10,6 @@ import threading
 import bpy
 
 
-
-def handle_data(data):
-    # Проверка типа данных
-    if data.startswith(b'TEXT:'):
-        print('Получена - command')
-        # Обработка текстовых данных
-        command = data[5:].decode('utf-8')
-        exec(command)
-    elif data.startswith(b'MARSHAL:'):
-        print('Получен - MARSHAL')
-        # Обработка маршализованных данных
-        marshaled_data = data[8:]
-        demarsh = marshal.loads(marshaled_data)
-        exec(demarsh)
-    else:
-        print("Неизвестный тип данных")
-
-
-
-
 # Собственно сам слушайющий сервер
 def start_server(port=3264):
     # Создает сокет, AF_INET - сетевой сокет (IPv4), SOCK_STREAM - сокет TCP
@@ -56,35 +36,16 @@ def start_server(port=3264):
                 data_parts.append(part)
             # Склеиваем бинарные данные
             data = b''.join(data_parts)
-
-            handle_data(data)
-
-            # print('RAW')
-            # print(data)
-
-            # demarsh = marshal.loads(data)
             
-            # print('Демарш')
-            # print(data)
-            
-            # print("Размер полученных данных:", len(data))
-            # print('post_demarsh')
-                                            
             # Декодирует полученные байты данных
-            # command = data.decode('utf-8')
-            # print('Декод')
+            command = data.decode('utf-8')
+
             # print(command)
-            
-            # Выполняет строку как Python код
-            # print('Демарш:', data)
+            print('*'*50)
+            exec(command)
 
-
-            # exec(command)
-
-
-            # exec(data)
             # Обновляет текущий видовой слой в Blender, что необходимо
-            bpy.context.view_layer.update()
+            # bpy.context.view_layer.update()
         except Exception as e:
             print(f"Ошибка обработки соединения: {e}")
         finally:

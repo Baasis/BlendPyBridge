@@ -33,18 +33,18 @@
 			},
       {
         "category": "BlendPyBridge",
-        "title": "%command.selectBlenderExecutable.title%",
-				"command": "blendpybridge.selectBlenderExecutable"
+        "title": "%command.pathExecSel.title%",
+				"command": "blendpybridge.pathExecSel"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "%command.cleanPathBlender.title%",
-        "command": "blendpybridge.cleanPathBlender"
+        "title": "%command.pathExecClean.title%",
+        "command": "blendpybridge.pathExecClean"
 			},
       {
 				"category": "BlendPyBridge",
-        "title": "%command.showPaths.title%",
-        "command": "blendpybridge.showPaths"
+        "title": "%command.pathExecShow.title%",
+        "command": "blendpybridge.pathExecShow"
 			},
       {
 				"category": "BlendPyBridge",
