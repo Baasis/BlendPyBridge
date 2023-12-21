@@ -1,25 +1,28 @@
-# command = `${pathPythonExe} "${scriptPath}" "${filePath}" "${workspacePath}" "${initFilePath}"`;
+# command = `${pathExecPython} "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
 
-# sys.argv[0] - scriptPath    - это путь к самому скрипту
-# d:\LIB_SVN\BRANCH_Personal_Use\DevCave\BlendPyBridge\scripts\socketSendCommand.py
+# sys.argv[0] - scriptPath    - это путь к текущему скрипту при его запуске
+# ...\BlendPyBridge\scripts\socketSendCommand.py
 
-# sys.argv[1] - filePath      - скрипт, который запускается blender-ом
-# d:\LIB_SVN\BRANCH_Personal_Use\DevCave\BlenToTanki\vi\tester.py
+# sys.argv[1] - pathPyFile      - целевой скрипт-проект, который запускается в blender-ом
+# ...\DevCave\VS_Code_Addons\EXPorter\testomizer.py
 
 # sys.argv[2] - workspacePath - папка проекта
-# d:\LIB_SVN\BRANCH_Personal_Use\DevCave\BlenToTanki\vi
+# ...\DevCave\VS_Code_Addons\EXPorter
 
-# sys.argv[3] - initFilePath  - __init__ полный путь, если есть
-# undefined
-# d:\LIB_SVN\BRANCH_Personal_Use\DevCave\BlenToTanki\vi\__init__.py
 
 import os
 import sys
 import socket
 
+from TerminalTextColer import ColTerm
 
+
+# Установка кодировки stdout и stderr на UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
 
+
+# Отправляем код на указанный адрес и порт
 def send_command(command, host='localhost', port=3264):
     # command = b'TEXT:' + command.encode('utf-8')
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -27,40 +30,40 @@ def send_command(command, host='localhost', port=3264):
         s.sendall(command.encode('utf-8'))
 
 
-print('/*'*20)
-
-# print(sys.path)
-print(sys.executable)
-
-# current_file_path = os.path.abspath(__file__)
-
-# base_path = os.getcwd()
-# Получаем каталог, в котором находится текущий файл
 work_dir = os.path.dirname(__file__)
-print(work_dir)
+# print(work_dir)
 
-# Путь к файлу модуля
+# Ищем файл, который отправится и выполнится в Blender, который запустит проект в пространстве Blender
+# Путь к файлу текущего модуля в расширении VS Code
 path_module = os.path.join(work_dir, 'blExec.py')
-if os.path.exists(path_module):
-    print('Валидненько:', path_module)
-    # Чтение исходного кода модуля
-    with open(path_module, 'r') as file:
-        module_code = file.read()
-    
-    # print(module_code)
 
+# На всякий случай проверяем наличие отправляемого скрипта
+if os.path.exists(path_module):
+    # print(f'{ColTerm.OKGREEN}Валидненько:{ColTerm.ENDC}', path_module)
+
+    # Чтение blExec.pyфайла, не забываем указывать кодировку
+    with open(path_module, 'r', encoding='utf-8') as file:
+        module_code = file.read()
 else:
-    print('НЕВалидненько!!!')
+    print(f'{ColTerm.FAIL}НЕВалидненько - Скрипта нет !!!{ColTerm.ENDC}')
     sys.exit(1)
 
 
-# Замена строки
-module_code = module_code.replace(
-    "path_dir_or_file = sys.argv[1]",
-    f"path_dir_or_file = r'{sys.argv[1]}'"
-)
+# Подменяем переменные путей в скрипте на пути проекта
+try:
+    # Замена строк
+    module_code = module_code.replace(
+        "run_file = None",
+        f"run_file = r'{sys.argv[1]}'"
+    ).replace(
+        "path_workspace = None",
+        f"path_workspace = r'{sys.argv[2]}'"
+    )
 
-# print(module_code)
-send_command(module_code)
+    # print(module_code)
+    send_command(module_code)
 
-print('Отправлено')
+except Exception as e:
+    print(f'\tОшибка отправке blExec.py в Blender: {e}')
+else:
+    print(f'{ColTerm.ORANGE}Файл {ColTerm.OKGREEN}blExec.py {ColTerm.ORANGE}отправлен успешно{ColTerm.ENDC}')

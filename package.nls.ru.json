@@ -1,9 +1,9 @@
 {
-	"command.start.title": "Запустить Blender с сервером сокетов",
+	"command.startBlender.title": "Запустить Blender с сокет сервером",
 	"command.pathExecSel.title": "Выбрать исполняемый файл Blender",
 	"command.pathExecClean.title": "Очистить путь к Blender",
-	"command.pathExecShow.title": "Показать пути к Blender и Python EXE",
-	"command.showActivePyFilePath.title": "Показать путь к активному файлу",
-	"command.sendCommandToBlender.title": "Отправить команду в Blender",
-	"command.onlylisten.title": "Только отправить"
+	"command.pathExecShow.title": "Показать пути к Blender и Python",
+	"command.showPathsProject.title": "Показать пути проекта",
+	"command.runCurrScript.title": "Запустить текущий скрипт в Blender",
+	"command.runEntirePackage.title": "Запустить весь пакет в Blender"
   }

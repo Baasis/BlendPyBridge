@@ -28,7 +28,7 @@ async function getPathsProject() {
         }
     }
 
-    return { pathCurrPyFile, pathWorkspace, pathInitFile };
+    return { pathCurrPyFile, pathInitFile, pathWorkspace };
 }
 
 
@@ -57,6 +57,7 @@ async function getBlenderVersion(pathExecBlender: string): Promise<string> {
 
 // activate срабатывает при активации расширения
 export function activate(context: vscode.ExtensionContext) {
+
     // Имя терминала
     const terminalName = "BlendPyBridge";
     // Ссылка на созданный терминал
@@ -65,7 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
     const scriptPath = path.join(context.extensionPath, 'scripts', 'socketStartProject.py');
 
     // Регистрация команды 'blendpybridge.start' в контексте расширения, оперделённую в package.json
-    let disposableStart = vscode.commands.registerCommand('blendpybridge.start', async () => {
+    let disposableStart = vscode.commands.registerCommand('blendpybridge.startBlender', async () => {
 
         // Проверка запущен ли в данный момент терминал чтобы заблокировать старт дубля
         if (terminal) {
@@ -87,13 +88,40 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // Создание терминала и запуск главного скрипта в нем
-        // VS Code срать хотел, что у тебя стоит в PATH и что по дефолту запускается в ms-python, поэтому указываем путь напрямую
+
+        let pathEnd;
+        let pathBegin;
+        const scriptServerSocket = path.join(context.extensionPath, 'scripts', 'socketBlenderBridge.py');
+
+        console.log('%cPython executable:', 'color: yellow');
+        // Получение последнего компонента пути и его покраска
+        pathEnd = path.basename(pathExecPython);
+        pathBegin = pathExecPython.slice(0, pathExecPython.lastIndexOf(pathEnd));
+        console.log(`%c${pathBegin}%c${pathEnd}`, 'color: normal', 'color: orange');
+
+        console.log('%cBlender executable:', 'color: yellow');
+        // Получение последнего компонента пути и его покраска
+        pathEnd = path.basename(pathExecBlender);
+        pathBegin = pathExecBlender.slice(0, pathExecBlender.lastIndexOf(pathEnd));
+        console.log(`%c${pathBegin}%c${pathEnd}`, 'color: normal', 'color: orange');
+
+        console.log('%cСерверный скрипт:', 'color: yellow');
+        pathEnd = path.basename(scriptServerSocket);
+        pathBegin = scriptServerSocket.slice(0, scriptServerSocket.lastIndexOf(pathEnd));
+        console.log(`%c${pathBegin}%c${pathEnd}`, 'color: normal', 'color: orange');
+
+        console.log('\n------->->>-->>>->>>> %cSTART_BRIDGE%c <<<<-<<<--<<-<-------', 'color: #FF69B4', 'color: reset');
+
+
+        // [HKEY_LOCAL_MACHINE\Software\Microsoft\Command Processor\Autorun]
+        // New String -> Autorun -> @chcp 65001>nul
+        // Создание терминала и запуск Blender с Socket сервером
         terminal = vscode.window.createTerminal({
             name: terminalName,
-            shellPath: pathExecPython,
-            shellArgs: [scriptPath, pathExecBlender]
+            shellPath: pathExecBlender,
+            shellArgs: ["--python", scriptServerSocket]
         });
+        
 
         // Отображение окна терминала, если он был скрыт и переключение на нужный
         terminal.show();
@@ -112,9 +140,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
-    // !!!!!!!!!!!!!!! Нельзя отправлять пока Blender не запущен
-    let disposableSendCommandToBlender = vscode.commands.registerCommand('blendpybridge.sendCommandToBlender', async () => {
-        const { pathCurrPyFile, pathWorkspace, pathInitFile } = await getPathsProject();
+    // Отправляем в Blender команду запуска проекта
+    // let disposableRunCurrScript = vscode.commands.registerCommand('blendpybridge.runCurrScript', async () => {
+    async function sendCommandToBlender(pathPyFile: string, pathWorkspace: string) {
+        // const { pathCurrPyFile, pathWorkspace, pathInitFile } = await getPathsProject();
         const scriptPath = path.join(context.extensionPath, 'scripts', 'socketSendCommand.py');
 
         // Использование сохраненного пути к Python интерпретатору Blender
@@ -124,7 +153,10 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const command = `${pathExecPython} "${scriptPath}" "${pathCurrPyFile}" "${pathWorkspace}" "${pathInitFile}"`;
+        // const command = `${pathExecPython} "${scriptPath}" "${pathCurrPyFile}" "${pathWorkspace}" "${pathInitFile}"`;
+        const command = `${pathExecPython} "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
+        // const command = `${pathExecPython} "${scriptPath}" "${pathInitFile}" "${pathWorkspace}"`;
+
         // Если вывод слишком большой, стоит использовать childProcess.spawn или настроить параметр maxBuffer
         childProcess.exec(command, (err, stdout, stderr) => {
             // err - содержит информацию об ошибке, возникшей во время выполнения команды
@@ -160,9 +192,36 @@ export function activate(context: vscode.ExtensionContext) {
             }
             vscode.window.showInformationMessage(`Команда отправлена`, 'OK');
         });
+    }
+
+    // context.subscriptions.push(disposableRunCurrScript);
+
+
+    // Обработчик команды для запуска текущего скрипта
+    let disposableRunCurrScript = vscode.commands.registerCommand('blendpybridge.runCurrScript', async () => {
+        const { pathCurrPyFile, pathWorkspace } = await getPathsProject();
+    
+        if (typeof pathCurrPyFile === 'string' && typeof pathWorkspace === 'string') {
+            sendCommandToBlender(pathCurrPyFile, pathWorkspace);
+        } else {
+            // Обработка случая, когда один из путей не определен
+            vscode.window.showErrorMessage('Не удалось получить путь к файлу скрипта или рабочей области.');
+        }
     });
 
-    context.subscriptions.push(disposableSendCommandToBlender);
+    // Обработчик команды для запуска всего пакета
+    let disposableRunEntirePackage = vscode.commands.registerCommand('blendpybridge.runEntirePackage', async () => {
+        const { pathInitFile, pathWorkspace } = await getPathsProject();
+    
+        if (typeof pathInitFile === 'string' && typeof pathWorkspace === 'string') {
+            sendCommandToBlender(pathInitFile, pathWorkspace);
+        } else {
+            // Обработка случая, когда один из путей не определен
+            vscode.window.showErrorMessage('Не удалось получить путь к __init__ файлу или рабочей области');
+        }
+    });
+    
+    context.subscriptions.push(disposableRunCurrScript, disposableRunEntirePackage);
 
 
 
@@ -273,11 +332,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     // Вывод всех путей для формирования команд
-    let disposableShowActivePyFilePath = vscode.commands.registerCommand('blendpybridge.showActivePyFilePath', async () => {
+    let disposableShowPathsProject = vscode.commands.registerCommand('blendpybridge.showPathsProject', async () => {
         const { pathCurrPyFile, pathWorkspace, pathInitFile } = await getPathsProject();
     
         if (pathCurrPyFile) {
-            vscode.window.showInformationMessage(`Путь Python файла: ${pathCurrPyFile}`, 'OK');
+            vscode.window.showInformationMessage(`Путь к исполняемому Python файлу: ${pathCurrPyFile}`, 'OK');
         } else {
             vscode.window.showWarningMessage('Нет активного Python файла', 'OK');
         }
@@ -285,16 +344,17 @@ export function activate(context: vscode.ExtensionContext) {
         if (pathWorkspace) {
             vscode.window.showInformationMessage(`Путь главной папки проекта: ${pathWorkspace}`, 'OK');
             if (pathInitFile) {
-                vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл: ${pathInitFile}`, 'OK');
+                // vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл: ${pathInitFile}`, 'OK');
+                vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл - это пакет`, 'OK');
             } else {
-                vscode.window.showWarningMessage('В рабочей области нет __init__.py файла', 'OK');
+                vscode.window.showWarningMessage('В рабочей области нет __init__.py файла - проект не является пакетом', 'OK');
             }
         } else {
             vscode.window.showWarningMessage('Нет рабочей области', 'OK');
         }
     });
 
-    context.subscriptions.push(disposableShowActivePyFilePath);
+    context.subscriptions.push(disposableShowPathsProject);
 
 
 

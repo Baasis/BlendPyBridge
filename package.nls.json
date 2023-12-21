@@ -1,10 +1,10 @@
 {
-    "command.start.title": "Start Blender with socket server",
+    "command.startBlender.title": "Start Blender with socket server",
     "command.pathExecSel.title": "Select Blender Executable",
     "command.pathExecClean.title": "Clean Path Blender",
-    "command.pathExecShow.title": "Print Path Blender & Python EXE",
-    "command.showActivePyFilePath.title": "Show Active File Path",
-    "command.sendCommandToBlender.title": "Send Command To Blender",
-    "command.onlylisten.title": "Only Send"
+    "command.pathExecShow.title": "Print Path Blender & Python",
+    "command.showPathsProject.title": "Show Paths Project",
+    "command.runCurrScript.title": "Run the current script in Blender",
+    "command.runEntirePackage.title": "Run the entire package in Blender"
   }
   

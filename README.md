@@ -1,71 +1,45 @@
-# blendpybridge README
+# Blender Python Bridge for "VS Code"
 
-This is the README for your extension "blendpybridge". After writing up a brief description, we recommend including the following sections.
+Позволяет запускать Blender в режиме прослушивания и запуска как отдельных команд так и целых скриптов, пакетов или даже многофайловых аддонов от клиента. В процессе использования создаётся программпый мост между Blender (сервер) и клиентом через socket сервер.
 
-## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Как это устроено в общем
 
-For example if there is an image subfolder under your extension project workspace:
+Пользователь создаёет скрипт/пакет/аддон в VS Code и запускает с использование горящей клавиши. Код передаётся в Blender устанавливает переданный код так как если бы вы его запаковали в zip архив и установили через Blender интерфейс. Разница лишь в том, что это всё происходит на лету и без файтической установки и работы с файлами на диске. Blender получает код и запуская, подхватывает все классы, функции, выполняет регистрации с фактического пути запуска в вашей папке проектов. При перезапуске код, все классы и модули разрегистрируются, удаляются, вычищаются, чтобы загрузить и выполнить новую версию кода. После выключения Blender ваш скрипт/пакет/аддон полностью вычищается.
+Пространство имен поддерживается аналогично структуре Blender, что позволяет упаковать ваше творение в zip и установить на постоянной осве или передать кому либо не боясь проблем с абсолютными и относительными путями в импортах.
 
-\!\[feature X\]\(images/feature-x.png\)
+## Зависимости
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Прямых зависимостей у расширения нет. Расширение требует указать путь до исполняемого файла Blender, после чего определяется путь до python интерпретатора встроенного в Blender. Будьте уверены в том, что код будет точно работать, так как использует встроенный в Blender интерпретатор.
 
-## Requirements
+## Что настроить
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+В Windows, системный терминал использует кодировку 866, что не позволяет отображать кирилицу в терминале, при получении сообщений от Blender в терминал. Кирилица на уровне VS Code и в скриптах поддерживается без проблем так как происходит декодирование вывода в utf расширением.
 
-## Extension Settings
+"CMD"
+Чтобы переключить системный "CMD" терминал на UTF-8 на постоянной основе, нужно в реестре перейти в
+"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Command Processor"
+Создать там "Строковый параметр" с именем "Autorun" в значении которого ввести
+"@chcp 65001>nul"
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+"PowerShell"
+Создайте папку с файлом, если её еще нет по пути
+"C:\Users\a_zhitkov\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
+Внутри файла одна строка с конфигом на переключение терминала
+[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-For example:
 
-This extension contributes the following settings:
+Это позволит автоматически выполнять команду смены кодировки перед запуском терминала на уровне системы. Оставляю это задачу на плечах пользователя так как не хочу вносить системные изменения за пользователя.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
 
-## Known Issues
+## Описание обновлений
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### 2023.12.28-01-beta
 
-## Release Notes
+Первичная версия для тестирования среди узкого круга коллег
 
-Users appreciate release notes as you update your extension.
+### 2024.Coming_Soon
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Документация, шаблоны, багфиксы
 
 ---
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**

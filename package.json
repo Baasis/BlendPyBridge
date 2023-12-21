@@ -3,10 +3,10 @@
   "displayName": "BlendPyBridge",
   "description": "Создаёт программпый мост между Blender и терминалом, используя socket для прослушивания отдельных команд, целых скриптов или даже многофайловых аддонов от клиента",
   "author": {
-		"name": "Andrei Zhitkov - Baasis - Andy"
-	},
+    "name": "Andrei Zhitkov - Baasis - Andy"
+  },
   "publisher": "Andrei Zhitkov",
-  "version": "0.1.2",
+  "version": "2023.12.28-01-beta",
   "engines": {
     "vscode": "^1.84.0"
   },
@@ -26,46 +26,62 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-			{
+      {
         "category": "BlendPyBridge",
-        "title": "%command.start.title%",
-				"command": "blendpybridge.start"
-			},
+        "title": "%command.startBlender.title%",
+        "command": "blendpybridge.startBlender"
+      },
       {
         "category": "BlendPyBridge",
         "title": "%command.pathExecSel.title%",
-				"command": "blendpybridge.pathExecSel"
-			},
+        "command": "blendpybridge.pathExecSel"
+      },
       {
-				"category": "BlendPyBridge",
+        "category": "BlendPyBridge",
         "title": "%command.pathExecClean.title%",
         "command": "blendpybridge.pathExecClean"
-			},
+      },
       {
-				"category": "BlendPyBridge",
+        "category": "BlendPyBridge",
         "title": "%command.pathExecShow.title%",
         "command": "blendpybridge.pathExecShow"
-			},
+      },
       {
-				"category": "BlendPyBridge",
-        "title": "%command.showActivePyFilePath.title%",
-        "command": "blendpybridge.showActivePyFilePath"
-			},
-      {
-				"category": "BlendPyBridge",
-        "title": "%command.sendCommandToBlender.title%",
-        "command": "blendpybridge.sendCommandToBlender"
-			},
-			{
         "category": "BlendPyBridge",
-        "title": "%command.onlylisten.title%",
-				"command": "blendpybridge.onlylisten"
-			}
+        "title": "%command.showPathsProject.title%",
+        "command": "blendpybridge.showPathsProject"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%command.runCurrScript.title%",
+        "command": "blendpybridge.runCurrScript"
+      },
+      {
+        "category": "BlendPyBridge",
+        "title": "%command.runEntirePackage.title%",
+        "command": "blendpybridge.runEntirePackage"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "blendpybridge.startBlender",
+        "key": "Shift+F7"
+      },
+      {
+        "command": "blendpybridge.runCurrScript",
+        "key": "Shift+F8",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "blendpybridge.runEntirePackage",
+        "key": "Shift+F9",
+        "when": "editorTextFocus"
+      }
     ]
   },
   "extensionDependencies": [
-		"ms-python.python"
-	],
+    "ms-python.python"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -75,24 +91,25 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.84.0",
     "@types/mocha": "^10.0.3",
     "@types/node": "18.x",
+    "@types/vscode": "^1.84.0",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
+    "@vscode/test-electron": "^2.3.6",
+    "esbuild": "^0.19.10",
     "eslint": "^8.52.0",
     "glob": "^10.3.10",
     "mocha": "^10.2.0",
-    "typescript": "^5.2.2",
-    "@vscode/test-electron": "^2.3.6"
+    "typescript": "^5.2.2"
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "bugs": {
-    "url": "https://github.com/.../.../issues"
+    "url": "https://github.com/Baasis/BlendPyBridge/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/.../....git"
+    "url": "https://github.com/Baasis/BlendPyBridge"
   },
   "homepage": "https://github.com/.../.../.../main/README.md"
 }
