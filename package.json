@@ -1,16 +1,17 @@
 {
   "name": "blendpybridge",
   "displayName": "BlendPyBridge",
-  "description": "Создаёт программпый мост между Blender и терминалом, используя socket для прослушивания отдельных команд, целых скриптов или даже многофайловых аддонов от клиента",
+  "description": "Удобная разработака скриптов и аддонов для Blender с помощью VS Code.",
   "author": {
     "name": "Andrei Zhitkov - Baasis - Andy"
   },
   "publisher": "Andrei Zhitkov",
-  "version": "2023.12.28-01-beta",
+  "version": "24.1.15-beta",
   "engines": {
     "vscode": "^1.84.0"
   },
   "categories": [
+    "Debuggers",
     "Other"
   ],
   "keywords": [
@@ -68,20 +69,17 @@
         "key": "Shift+F7"
       },
       {
-        "command": "blendpybridge.runCurrScript",
+        "command": "blendpybridge.runEntirePackage",
         "key": "Shift+F8",
         "when": "editorTextFocus"
       },
-      {
-        "command": "blendpybridge.runEntirePackage",
+			{
+        "command": "blendpybridge.runCurrScript",
         "key": "Shift+F9",
         "when": "editorTextFocus"
       }
     ]
   },
-  "extensionDependencies": [
-    "ms-python.python"
-  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -103,7 +101,7 @@
     "mocha": "^10.2.0",
     "typescript": "^5.2.2"
   },
-  "license": "SEE LICENSE IN LICENSE.txt",
+  "license": "LICENSE.txt",
   "bugs": {
     "url": "https://github.com/Baasis/BlendPyBridge/issues"
   },
@@ -111,5 +109,5 @@
     "type": "git",
     "url": "https://github.com/Baasis/BlendPyBridge"
   },
-  "homepage": "https://github.com/.../.../.../main/README.md"
+  "homepage": "https://github.com/Baasis"
 }

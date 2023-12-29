@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -33,7 +34,7 @@ async function getPathsProject() {
 
 
 
-// Здесь мы не проверяем наличие пути, проверим перед вызовом !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Получаем версию Blender запуская исполняемый файл с аргументом --version и разбирается через регулярные выражения
 async function getBlenderVersion(pathExecBlender: string): Promise<string> {
     return new Promise((resolve, reject) => {
         childProcess.exec(`"${pathExecBlender}" --version`, (error, stdout, stderr) => {
@@ -226,22 +227,30 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
-    // Выбор пути к blender.exe и его Python интерпретатору
-    // В linux всегда отображение всех файлов !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Выбор пути к blender и его Python интерпретатору
     let pathExecSel = vscode.commands.registerCommand('blendpybridge.pathExecSel', async () => {
-        // Диалоговое окно File browser, для выбора файла blender
-        const options: vscode.OpenDialogOptions = {
-            // Позволяет выбрать только один файл.
-            canSelectMany: false,
-            // Текст, который будет отображаться на кнопке для подтверждения выбора файла в диалоговом окне
-            openLabel: 'Select',
-            filters: {
-                // Фильтр для .exe, .sh, файлы без расширения не отображаются
-                'Executable Files': ['exe', 'sh', ''],
-                // Строка фильтра для отображения всех файлов
+
+        let filters;
+        if (process.platform === "win32") {
+            // Для Windows показываем только .exe и все файлы
+            filters = {
+                'Executable Files': ['exe'],
                 'All Files': ['*']
-            }
+            };
+        } else {
+            // Для Linux (и других систем, не являющихся Windows) показываем все файлы
+            filters = {
+                'All Files': ['*'],
+                'Executable Files': ['sh'],
+            };
+        }
+    
+        const options: vscode.OpenDialogOptions = {
+            canSelectMany: false,
+            openLabel: 'Select',
+            filters: filters
         };
+
 
         // Отображение диалогового окна и ожидание выбора файла пользователем
         const fileUri = await vscode.window.showOpenDialog(options);
@@ -260,7 +269,11 @@ export function activate(context: vscode.ExtensionContext) {
                 let blenderBasePath = path.dirname(pathExecBlender);
     
                 // Формирование пути к Python
-                let pathExecPython = path.join(blenderBasePath, `${blenderVersion}`, 'python', 'bin', 'python.exe');
+                // let pyExecFile = process.platform === "win32" ? 'python.exe' : `python${blenderVersion}`;
+                // !!!!!!!!!!! Нужно сделать обработку для разных систем и Blender-ов, потому что Python в разных местах !!!!!!!!!
+                let pyExecFile = process.platform === "win32" ? 'python.exe' : `python3.10`;
+                console.log(`Blender python: ${pyExecFile}`);
+                let pathExecPython = path.join(blenderBasePath, `${blenderVersion}`, 'python', 'bin', pyExecFile);
     
                 // Проверка существования файла Python
                 if (fs.existsSync(pathExecPython)) {
@@ -365,3 +378,43 @@ export function activate(context: vscode.ExtensionContext) {
 // Функция, срабатывающая при деактивации аддона
 export function deactivate() {}
 
+
+
+// // Структура для хранения путей
+// const blenderPaths = {
+//     'windows': {
+//         '3.6': 'Путь/к/Blender/3.6/на/Windows',
+//         '4.0': 'Путь/к/Blender/4.0/на/Windows',
+//     },
+//     'linux': {
+//         '3.6': '/mnt/LIN_DATA/APP/STEAM_LINUX/steamapps/common/Blender/3.6/python/bin/python3.10',
+//         '4.0': '/mnt/LIN_DATA/APP/STEAM_LINUX/steamapps/common/Blender/4.0/python/bin/python3.10',
+//     }
+// };
+
+// function getBlenderPythonPath(blenderVersion: string): string {
+//     const platform = os.platform() === 'win32' ? 'windows' : 'linux';
+    
+//     // Получаем базовый путь для данной ОС и версии Blender
+//     const basePath = blenderPaths[platform][blenderVersion];
+//     if (!basePath) {
+//         throw new Error(`Путь для Blender версии ${blenderVersion} на платформе ${platform} не найден.`);
+//     }
+
+//     // Формируем полный путь к исполняемому файлу Python
+//     if (platform === 'windows') {
+//         return path.join(basePath, 'python.exe');
+//     } else {
+//         // Для Linux путь уже включает имя файла
+//         return basePath;
+//     }
+// }
+
+// // Пример использования
+// try {
+//     const blenderVersion = '3.6'; // Пример, версия может быть получена динамически
+//     const pythonPath = getBlenderPythonPath(blenderVersion);
+//     console.log(pythonPath);
+// } catch (error) {
+//     console.error(error.message);
+// }
