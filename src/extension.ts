@@ -71,21 +71,21 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Проверка запущен ли в данный момент терминал чтобы заблокировать старт дубля
         if (terminal) {
-            vscode.window.showWarningMessage('Экземпляр уже работает', 'OK');
+            vscode.window.showWarningMessage('Экземпляр уже работает');
             return;
         }
         
         // Использование сохраненного пути к Blender
         const pathExecBlender = context.globalState.get<string>('pathExecBlender');
         if (!pathExecBlender) {
-            vscode.window.showErrorMessage('Необходимо указать путь к Blender', 'OK');
+            vscode.window.showErrorMessage('Необходимо указать путь к Blender');
             return;
         }
 
         // Использование сохраненного пути к Python интерпретатору Blender
         const pathExecPython = context.globalState.get<string>('pathExecPython');
         if (!pathExecPython) {
-            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender', 'OK');
+            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender');
             return;
         }
 
@@ -142,7 +142,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     // Отправляем в Blender команду запуска проекта
-    // let disposableRunCurrScript = vscode.commands.registerCommand('blendpybridge.runCurrScript', async () => {
     async function sendCommandToBlender(pathPyFile: string, pathWorkspace: string) {
         // const { pathCurrPyFile, pathWorkspace, pathInitFile } = await getPathsProject();
         const scriptPath = path.join(context.extensionPath, 'scripts', 'socketSendCommand.py');
@@ -150,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
         // Использование сохраненного пути к Python интерпретатору Blender
         const pathExecPython = context.globalState.get<string>('pathExecPython');
         if (!pathExecPython) {
-            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender', 'OK');
+            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender');
             return;
         }
 
@@ -172,34 +171,37 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // Проверка на конкретное сообщение об ошибке
                 if (err.message && err.message.includes('ConnectionRefusedError')) {
-                    vscode.window.showErrorMessage('Ошибка подключения: конечный компьютер отверг запрос на подключение', 'OK');
+                    vscode.window.showErrorMessage('Ошибка подключения: конечный компьютер отверг запрос на подключение');
                 } else {
                     // Вывод общего сообщения об ошибке
-                    vscode.window.showErrorMessage('Произошла ошибка, но я пока не знаю какая. Пожалуйста пришлите мне её в Issuie.', 'OK');
+                    vscode.window.showErrorMessage('Произошла ошибка, но я пока не знаю какая. Пожалуйста пришлите мне её в Issuie.');
                 }
                 return;
             }
             if (stdout) {
-                // vscode.window.showErrorMessage(`stdout`, 'OK');
                 console.error('------------>>>> stdout <<<<------------');
                 console.error(stdout);
                 return;
             }
             if (stderr) {
-                vscode.window.showErrorMessage(`Ошибка stderr`, 'OK');
+                vscode.window.showErrorMessage(`Ошибка stderr`);
                 console.error('------------>>>> stderr <<<<------------');
                 console.error(stderr);
                 return;
             }
-            vscode.window.showInformationMessage(`Команда отправлена`, 'OK');
+            vscode.window.showInformationMessage(`Команда отправлена`);
         });
     }
-
-    // context.subscriptions.push(disposableRunCurrScript);
 
 
     // Обработчик команды для запуска текущего скрипта
     let disposableRunCurrScript = vscode.commands.registerCommand('blendpybridge.runCurrScript', async () => {
+        // Проверяем, запущен ли в данный момент терминал с Blender
+        if (!terminal) {
+            vscode.window.showErrorMessage('Blender не запущен, некуда отправлять.');
+            return;
+        }
+
         const { pathCurrPyFile, pathWorkspace } = await getPathsProject();
     
         if (typeof pathCurrPyFile === 'string' && typeof pathWorkspace === 'string') {
@@ -212,6 +214,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Обработчик команды для запуска всего пакета
     let disposableRunEntirePackage = vscode.commands.registerCommand('blendpybridge.runEntirePackage', async () => {
+        // Проверяем, запущен ли в данный момент терминал с Blender
+        if (!terminal) {
+            vscode.window.showErrorMessage('Blender не запущен, некуда отправлять.');
+            return;
+        }
+
         const { pathInitFile, pathWorkspace } = await getPathsProject();
     
         if (typeof pathInitFile === 'string' && typeof pathWorkspace === 'string') {
@@ -228,7 +236,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     // Выбор пути к blender и его Python интерпретатору
-    let pathExecSel = vscode.commands.registerCommand('blendpybridge.pathExecSel', async () => {
+    let disposablePathExecSel = vscode.commands.registerCommand('blendpybridge.pathExecSel', async () => {
+
+        // Проверяем, запущен ли в данный момент терминал
+        if (terminal) {
+            vscode.window.showWarningMessage('Нельзя изменять путь к Blender и Python, пока Blender запущен');
+            return;
+        }
 
         // Win
         // \APP\blender-2.83.20-windows-x64\2.83\python\bin\python.exe
@@ -323,8 +337,8 @@ export function activate(context: vscode.ExtensionContext) {
                 // Проверка существования файла Python по собранному пути
                 if (pathExecPython && fs.existsSync(pathExecPython)) {
                     await context.globalState.update('pathExecPython', pathExecPython);
-                    vscode.window.showInformationMessage(`Blender path selected:\n${pathExecBlender}`, 'OK');
-                    vscode.window.showInformationMessage(`Python path: ${pathExecPython}`, 'OK');
+                    vscode.window.showInformationMessage(`Blender path selected:\n${pathExecBlender}`);
+                    vscode.window.showInformationMessage(`Python path: ${pathExecPython}`);
                 } else {
                     vscode.window.showErrorMessage('Не найден интерпретатор Python для данной версии Blender');
                 }
@@ -335,16 +349,23 @@ export function activate(context: vscode.ExtensionContext) {
 
         } else {
             // Если файл не был выбран, показываем предупреждающее сообщение
-            vscode.window.showWarningMessage('Исполняемый файл Blender не выбран', 'OK');
+            vscode.window.showWarningMessage('Исполняемый файл Blender не выбран');
         }
     });
 
     // Добавление команд в подписки контекста расширения, для очистки после отключения расширения
-    context.subscriptions.push(pathExecSel);
+    context.subscriptions.push(disposablePathExecSel);
 
 
     // Зачистка глобальных переменных
-    let pathExecClean = vscode.commands.registerCommand('blendpybridge.pathExecClean', async () => {
+    let disposablePathExecClean = vscode.commands.registerCommand('blendpybridge.pathExecClean', async () => {
+
+        // Проверяем, запущен ли в данный момент терминал
+        if (terminal) {
+            vscode.window.showWarningMessage('Нельзя очистить пути, пока Blender запущен');
+            return;
+        }
+
         // Здесь список ключей, которые вы хотите удалить
         const keysToDelete = ['blenderPaths', 'pathBlenderExe', 'pathExecBlender', 'pathExecPython'];
 
@@ -352,17 +373,17 @@ export function activate(context: vscode.ExtensionContext) {
             await context.globalState.update(key, undefined);
         });
 
-        vscode.window.showInformationMessage('Путь к Blender из глобальных переменных был удален', 'OK');
+        vscode.window.showInformationMessage('Путь к Blender из глобальных переменных был удален');
     });
 
-    context.subscriptions.push(pathExecClean);
+    context.subscriptions.push(disposablePathExecClean);
 
 
 
 
     // ######## ######## ######## ######## DEBUG ZONE ######## ######## ######## ########
     // Вывод путей к Blender и к Python
-    let pathExecShow = vscode.commands.registerCommand('blendpybridge.pathExecShow', async () => {
+    let disposablePathExecShow = vscode.commands.registerCommand('blendpybridge.pathExecShow', async () => {
         // Заменить на путь Python Blender <---------------------------------
         // const pathPythonExe = await getPathPythonExe(context);
         const pathExecPython = context.globalState.get<string>('pathExecPython');
@@ -372,17 +393,17 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`Текущий путь Python: ${pathExecPython}`, 'OK');
             
         } else {
-            vscode.window.showWarningMessage(`Текущий путь Python не определен`, 'OK');
+            vscode.window.showWarningMessage(`Текущий путь Python не определен`);
         }
         
         if (pathExecBlender) {
             vscode.window.showInformationMessage(`Текущий путь Blender: ${pathExecBlender}`, 'OK');
         } else {
-            vscode.window.showWarningMessage(`Текущий путь Blender не определен`, 'OK');
+            vscode.window.showWarningMessage(`Текущий путь Blender не определен`);
         }
     });
 
-    context.subscriptions.push(pathExecShow);
+    context.subscriptions.push(disposablePathExecShow);
 
 
 
@@ -393,19 +414,18 @@ export function activate(context: vscode.ExtensionContext) {
         if (pathCurrPyFile) {
             vscode.window.showInformationMessage(`Путь к исполняемому Python файлу: ${pathCurrPyFile}`, 'OK');
         } else {
-            vscode.window.showWarningMessage('Нет активного Python файла', 'OK');
+            vscode.window.showWarningMessage('Нет активного Python файла');
         }
     
         if (pathWorkspace) {
             vscode.window.showInformationMessage(`Путь главной папки проекта: ${pathWorkspace}`, 'OK');
             if (pathInitFile) {
-                // vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл: ${pathInitFile}`, 'OK');
-                vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл - это пакет`, 'OK');
+                vscode.window.showInformationMessage(`В рабочей области есть __init__.py файл - это пакет`);
             } else {
-                vscode.window.showWarningMessage('В рабочей области нет __init__.py файла - проект не является пакетом', 'OK');
+                vscode.window.showWarningMessage('В рабочей области нет __init__.py файла - проект не является пакетом');
             }
         } else {
-            vscode.window.showWarningMessage('Нет рабочей области', 'OK');
+            vscode.window.showWarningMessage('Нет рабочей области');
         }
     });
 

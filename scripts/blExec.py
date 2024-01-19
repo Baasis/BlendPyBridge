@@ -102,6 +102,7 @@ for module_name in list(addon_modules):
 
 # Запуск/перезапуск проекта
 # exec(codepile, exec_variables)
+print('Попытка запуска проекта')
 exec(code, exec_variables)
 
 
