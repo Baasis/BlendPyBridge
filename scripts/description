@@ -1,8 +1,16 @@
 
-
+TerminalTextColer.py
+Небольшой файлик, использую для форматирования текст вывода в терминал
 
 _blSteamPy.bat
 Попытки научиться запускать Blender из Steam со скриптом socket сервера
+
+
+socketSendCommand.py
+Файл запускаемый python-ом в VS Code при выполнении runCurrScript или runEntirePackage
+python socketSendCommand.py путь_скрипта_проекта путь_скрипта_воркспейса
+
+
 
 blExec.py
 Скрипт, который передаётся в Blender в socketSendCommand.py и запускается блендером.

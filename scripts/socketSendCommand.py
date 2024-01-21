@@ -3,7 +3,7 @@
 # sys.argv[0] - scriptPath    - это путь к текущему скрипту при его запуске
 # ...\BlendPyBridge\scripts\socketSendCommand.py
 
-# sys.argv[1] - pathPyFile      - целевой скрипт-проект, который запускается в blender-ом
+# sys.argv[1] - pathPyFile    - целевой скрипт-проект, который будет запускаться blender-ом
 # ...\DevCave\VS_Code_Addons\EXPorter\testomizer.py
 
 # sys.argv[2] - workspacePath - папка проекта
@@ -14,7 +14,18 @@ import os
 import sys
 import socket
 
-from TerminalTextColer import ColTerm
+
+class ColTerm:
+    HEADER = '\033[95m'      # Цвет текста: Розовый
+    OKBLUE = '\033[94m'      # Цвет текста: Синий
+    OKGREEN = '\033[92m'     # Цвет текста: Зеленый
+    WARNING = '\033[93m'     # Цвет текста: Желтый
+    ORANGE = '\033[38;5;208m'# ANSI код для оранжевого цвета
+    FAIL = '\033[91m'        # Цвет текста: Красный
+    ENDC = '\033[0m'         # Сброс цвета к стандартному
+    BG_BLUE = '\033[44m'     # Фон: Синий
+    BG_GREEN = '\033[42m'    # Фон: Зеленый
+    BG_YELLOW = '\033[43m'   # Фон: Желтый
 
 
 # Установка кодировки stdout и stderr на UTF-8
@@ -30,26 +41,26 @@ def send_command(command, host='localhost', port=3264):
         s.sendall(command.encode('utf-8'))
 
 
-work_dir = os.path.dirname(__file__)
-# print(work_dir)
+# Формируем путь к файлу, который отправится и выполнится в Blender,
+# чтобы запустит требуемый проект в пространстве Blender
 
-# Ищем файл, который отправится и выполнится в Blender, который запустит проект в пространстве Blender
-# Путь к файлу текущего модуля в расширении VS Code
+# Путь к папке с текущим файлом этого скрипта
+work_dir = os.path.dirname(__file__)
+# Путь к файлу blExec.py лежашего рядом с текущим скриптом
 path_module = os.path.join(work_dir, 'blExec.py')
+
 
 # На всякий случай проверяем наличие отправляемого скрипта
 if os.path.exists(path_module):
-    # print(f'{ColTerm.OKGREEN}Валидненько:{ColTerm.ENDC}', path_module)
-
-    # Чтение blExec.pyфайла, не забываем указывать кодировку
+    # Чтение blExec.py файла, не забываем указывать кодировку
     with open(path_module, 'r', encoding='utf-8') as file:
         module_code = file.read()
 else:
-    print(f'{ColTerm.FAIL}НЕВалидненько - Скрипта нет !!!{ColTerm.ENDC}')
+    print(f'{ColTerm.FAIL}Скрипта blExec.py нет в папке{ColTerm.ENDC}')
     sys.exit(1)
 
 
-# Подменяем переменные путей в скрипте на пути проекта
+# Подменяем переменные путей в blExec.py на пути запускаемого проекта
 try:
     # Замена строк
     module_code = module_code.replace(
@@ -59,8 +70,9 @@ try:
         "path_workspace = None",
         f"path_workspace = r'{sys.argv[2]}'"
     )
-
     # print(module_code)
+
+    # Функция отправки кода на сервер
     send_command(module_code)
 
 except Exception as e:
