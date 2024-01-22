@@ -40,12 +40,14 @@ def handle_client(client_sock):
             # Декодирует полученные байты данных
             command = data.decode('utf-8')
             
-            print('*'*50)
+            # Разграничивающая линия перед запуском полученного кода
+            # print('*'*50)
             
             # Особая проверка чтобы пользователь не мог прервать помимо своего аддона еще и сервер
             try:
                 # exec в своем собственном локальном контексте и не видит глобальные переменные
                 exec(command, globals())
+                # pass
             except SystemExit:
                 print(f'{Color.ORANGE}Вызван {Color.RED}sys.exit(){Color.ORANGE}, но сервер продолжит работу{Color.RESET}')
             except Exception as e:
@@ -53,13 +55,13 @@ def handle_client(client_sock):
         else:
             print('Нет данных для получения')
 
-        # Обновляет текущий видовой слой в Blender, что необходимо
+        # Обновляет текущий видовой слой в Blender, если необходимо
         # bpy.context.view_layer.update()
 
     except Exception as e:
         print(f'Ошибка обработки соединения: {e}')
     finally:
-        # После получения всех частей код и его заупска - закрываем соединение
+        # После получения всех частей кода и его заупска - закрываем соединение
         client_sock.close()
         print(f'{Color.YELLOW}Соединение закрыто{Color.RESET}')
 
@@ -78,13 +80,14 @@ def start_server(port=3264):
         # Ожидает входящее соединение от клиента, весь потом останавливается в ожидании сообщения
         client_sock, address = server.accept()
         print(f'{Color.YELLOW}Подключено к {Color.GREEN}{address}{Color.RESET}')
-        
+        # Сборка получаемого пакета и его запуск
         handle_client(client_sock)
 
 
 
 
 # Аварийная самовырубалка процесса, на случай зависания или специфического вылета Blender
+# Оно же проверялка текущего состояния сервера с обратным откликом
 def check_blender_status():
     start_time = time.time()
     while True:
@@ -98,16 +101,17 @@ def check_blender_status():
         except Exception as e:
             print(f'{Color.YELLOW}Остановка сервера:{Color.RESET}', e)
             sys.exit(0)
-        time.sleep(4)
+        time.sleep(8)
 
 
 # Господа демоны-процессы
 def server_run():
+    # Процесс слушающего сервера
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
-
+    # Процесс обратного отклика и статуса
     check_thread = threading.Thread(target=check_blender_status, daemon=True)
     check_thread.start()
 
-
+# Запуск всей это эпопеи
 server_run()
