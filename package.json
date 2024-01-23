@@ -5,8 +5,8 @@
   "author": {
     "name": "Andrei Zhitkov - Baasis - Andy"
   },
-  "publisher": "Andrei Zhitkov",
-  "version": "24.1.22-beta",
+  "publisher": "BaasiS",
+  "version": "2401.22.1",
   "engines": {
     "vscode": "^1.84.0"
   },

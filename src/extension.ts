@@ -170,7 +170,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Формирование строки для дальнейшего запуска в exec. Тут python + пути в качестве аргументов
-        const command = `${pathExecPython} "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
+        // const command = `${pathExecPython} "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
+        const command = `"${pathExecPython}" "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
 
         // Если вывод слишком большой, стоит использовать childProcess.spawn или настроить параметр maxBuffer
         childProcess.exec(command, (err, stdout, stderr) => {
