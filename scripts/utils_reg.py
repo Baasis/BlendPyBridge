@@ -1,3 +1,4 @@
+import gc
 import sys
 
 import bpy
@@ -18,7 +19,10 @@ def UNregister(package_name):
 
         for name in dir(module):
             obj = getattr(module, name)
-            if isinstance(obj, type) and name not in processed_classes and not issubclass(obj, bpy.types.PropertyGroup):
+
+            exclusion_classes = [bpy.types.PropertyGroup, bpy.types.Panel, ]
+            # if isinstance(obj, type) and name not in processed_classes and not issubclass(obj, bpy.types.PropertyGroup):
+            if isinstance(obj, type) and name not in processed_classes and not any(issubclass(obj, cls) for cls in exclusion_classes):
                 # Проверяем, есть ли у класса атрибут bl_rna
                 if hasattr(obj, "bl_rna"):
                     processed_classes.add(name)
@@ -38,6 +42,5 @@ def UNregister(package_name):
         # Удаляем модуль из sys.modules
         del sys.modules[module_name]
         print(f'* Модуль {module_name} удалён из sys.modules')
-    
+
     print('\n')
-    

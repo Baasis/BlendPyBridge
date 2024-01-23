@@ -51,7 +51,7 @@ if name_file == '__init__.py' and path_dir == path_workspace:
     print('Это __init__.py основного пакета')
 
     # Разрегистрация старой версии аддона
-    UNregister(path_package)
+    classes_to_remove = UNregister(path_package)
 
     # Потом можно удалять старый путь из sys.path
     # add_sys_path = add_path_package(path_workspace)
@@ -82,7 +82,6 @@ exec_variables = {
     '__package__': path_package,
     # 'DEBUG_MODE' : None,
 }
-# print(*[f'{key}: {value}' for key, value in exec_variables.items()], sep='\n')
 
 
 with open(run_file) as f:

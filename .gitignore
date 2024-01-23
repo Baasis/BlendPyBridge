@@ -3,6 +3,6 @@ dist
 node_modules
 .vscode-test/
 *.vsix
-scripts/__pycache__/
+**/__pycache__/
 src/test/
 vsc-extension-quickstart.md
