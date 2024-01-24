@@ -60,8 +60,7 @@ if os.path.exists(path_module):
         module_code = file.read()
 else:
     print(f'{ColTerm.FAIL}Скрипта blExec.py нет в папке{ColTerm.ENDC}')
-    sys.exit(1)
-
+    sys.exit(0)
 
 # Подменяем переменные путей в blExec.py на пути запускаемого проекта
 try:

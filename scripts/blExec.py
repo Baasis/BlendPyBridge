@@ -51,7 +51,8 @@ if name_file == '__init__.py' and path_dir == path_workspace:
     print('Это __init__.py основного пакета')
 
     # Разрегистрация старой версии аддона
-    classes_to_remove = UNregister(path_package)
+    # classes_to_remove = UNregister(path_package)
+    # UNregister(path_package)
 
     # Потом можно удалять старый путь из sys.path
     # add_sys_path = add_path_package(path_workspace)
@@ -88,15 +89,16 @@ with open(run_file) as f:
     code = f.read()
     # init_path типо имя файла на случай вызова ошибки 
     # codepile = compile(code, 'init_path', 'exec')
-# exec(codepile, exec_variables)
 
 # Запуск/перезапуск проекта
 print('Запуск проекта')
 exec(code, exec_variables)
+# print('Запуск')
+# exec(codepile, exec_variables)
 
 # После выполнения exec, функция register должна быть доступна в exec_variables
-if 'register' in exec_variables:
-    register_func = exec_variables['register']
-    register_func()
-else:
-    print('Функция register не найдена')
+# if 'register' in exec_variables:
+#     register_func = exec_variables['register']
+#     register_func()
+# else:
+#     print('Функция register не найдена')

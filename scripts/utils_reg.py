@@ -23,6 +23,7 @@ def UNregister(package_name):
             exclusion_classes = [bpy.types.PropertyGroup, bpy.types.Panel, ]
             # if isinstance(obj, type) and name not in processed_classes and not issubclass(obj, bpy.types.PropertyGroup):
             if isinstance(obj, type) and name not in processed_classes and not any(issubclass(obj, cls) for cls in exclusion_classes):
+                # print('OBJ - ', obj)
                 # Проверяем, есть ли у класса атрибут bl_rna
                 if hasattr(obj, "bl_rna"):
                     processed_classes.add(name)

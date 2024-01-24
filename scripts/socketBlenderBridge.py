@@ -67,6 +67,7 @@ def handle_client(client_sock):
 
 
 # Собственно сам слушайющий сервер
+# Если быстро перезапустить Blender, сервер не успеет остановится и ругнется на двойной запуск
 def start_server(port=3264):
     # Создает сокет, AF_INET - сетевой сокет (IPv4), SOCK_STREAM - сокет TCP
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
