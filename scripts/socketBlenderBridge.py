@@ -1,6 +1,7 @@
 # Файл запускается Blender-ом при старте
 # blender --python self_script.py
 
+import os
 import sys
 import time
 import socket
@@ -9,16 +10,115 @@ import threading
 import bpy
 
 
+
+# Добавляем директорию скрипта в sys.path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.append(script_dir)
+
+# from utils_reg import UNregister
+
+
+
+
 class Color:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    ORANGE = '\033[38;5;208m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    RESET = '\033[0m'
+    RED     = '\033[91m'        # Цвет текста: Красный
+    GREEN   = '\033[92m'        # Цвет текста: Зеленый
+    YELLOW  = '\033[93m'        # Цвет текста: Желтый
+    ORANGE  = '\033[38;5;208m'  # ANSI код для оранжевого цвета
+    MAGENTA = '\033[95m'        # Цвет текста: Розовый
+    RESET   = '\033[0m'         # Сброс цвета к стандартному
+
+    # BLUE = '\033[94m'
+    # CYAN = '\033[96m'
+    # WHITE = '\033[97m'
+
+    BG_BLUE = '\033[44m'      # Фон: Синий
+    BG_GREEN = '\033[42m'     # Фон: Зеленый
+    BG_YELLOW = '\033[43m'    # Фон: Желтый
+
+
+
+
+def blExec(message):
+    # Полученные от клиента пути для запуска проекта
+    pathWorkspace, pathPyFile = message.split('\n')
+    
+    # Путь к непосредственно запущенному файлу в VS Code (__init__ или script)
+    # path/to/folder and name_file.py
+    path_dir, name_file = os.path.split(pathPyFile)
+
+    # Полученное имя является именем пакета для exec_variables,
+    # Для учитывания вложенности запускаемого файла относительно корня
+    path_package = os.path.basename(path_dir)
+
+
+    # Определение типа запуска - скрипт/аддон
+    if path_dir == pathWorkspace and name_file == '__init__.py':
+        print('Это __init__.py основного пакета')
+
+        # Разрегистрация старой версии аддона
+        # classes_to_remove = UNregister(path_package)
+        # UNregister(path_package)
+
+        # Потом можно удалять старый путь из sys.path
+        # add_sys_path = add_path_package(path_workspace)
+
+        # Добавляем root каталог проекта в sys.path
+        # С точки зрения Blender нужно указать не папку с проектом,
+        # а root каталог в котором находится каталог проекта
+        path_to_add = os.path.dirname(pathWorkspace)
+        if path_to_add not in sys.path:
+            # .../DevCave/my_project
+            sys.path.append(path_to_add)
+        # Сделать удаления из sys.path
+
+    elif name_file.endswith('.py'):
+
+        if name_file == '__init__.py':
+            print('Обрабатываем __init__.py подмодуля как обычный скрипт')
+        else:
+            print(f'Это самостоятельный скрипт: {name_file}')
+        # Здесь не добавляем путь в sys.path, т.к. у скриптов нет относительных импортов
+        # Относиительные импорты работают только с пакетами, но вооще python добавляет
+    else:
+        print('Ошибка: Это не *.py файл')
+        sys.exit(0)
+
+
+    # Словарь переменных для эмуляции переменных скрипта/аддона
+    exec_variables = {
+        '__file__'   : pathPyFile,
+        # Для скрипта и пакета ???
+        '__name__'   : '__main__',
+        '__package__': path_package,
+        # 'DEBUG_MODE' : None,
+    }
+
+
+    with open(pathPyFile) as f:
+        code = f.read()
+        # init_path типо имя файла на случай вызова ошибки 
+        # codepile = compile(code, 'init_path', 'exec')
+
+
+    # Запуск/перезапуск проекта
+    print('Запуск проекта')
+    # exec(code, exec_variables)
+    # exec(codepile, exec_variables)
+
+
+    print('Отработано')
+    # После выполнения exec, функция register должна быть доступна в exec_variables
+    # Если main != name ???
+    # if 'register' in exec_variables:
+    #     register_func = exec_variables['register']
+    #     register_func()
+    # else:
+    #     print('Функция register не найдена')
+
+
+
 
 
 def handle_client(client_sock):
@@ -27,7 +127,7 @@ def handle_client(client_sock):
         data_parts = []
         while True:
             # Получает данные от клиента
-            part = client_sock.recv(4096)
+            part = client_sock.recv(1024)
             # Если часть пустая, значит все данные получены
             if not part:
                 break
@@ -38,15 +138,16 @@ def handle_client(client_sock):
 
         if data:
             # Декодирует полученные байты данных
-            command = data.decode('utf-8')
+            message = data.decode('utf-8')
             
             # Разграничивающая линия перед запуском полученного кода
-            # print('*'*50)
+            print('*'*50)
             
             # Особая проверка чтобы пользователь не мог прервать помимо своего аддона еще и сервер
             try:
                 # exec в своем собственном локальном контексте и не видит глобальные переменные
-                exec(command, globals())
+                # exec(command, globals())
+                blExec(message)
                 # pass
             except SystemExit:
                 print(f'{Color.ORANGE}Вызван {Color.RED}sys.exit(){Color.ORANGE}, но сервер продолжит работу{Color.RESET}')

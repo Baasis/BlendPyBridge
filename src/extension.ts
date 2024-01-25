@@ -79,8 +79,6 @@ export function activate(context: vscode.ExtensionContext) {
     const terminalName = "BlendPyBridge";
     // Ссылка на созданный терминал
     let terminal: vscode.Terminal | undefined;
-    // Путь к главному скрипту проекта
-    const scriptPath = path.join(context.extensionPath, 'scripts', 'socketStartProject.py');
 
     // Регистрация команды 'blendpybridge.start' в контексте расширения, оперделённую в package.json
     let disposableStart = vscode.commands.registerCommand('blendpybridge.startBlender', async () => {
@@ -158,9 +156,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     // Отправляем в Blender команду запуска проекта
-    async function sendCommandToBlender(pathPyFile: string, pathWorkspace: string) {
+    async function sendCommandToBlender(pathWorkspace: string, pathPyFile: string) {
         // Путь к скрипту откправки кода по сокету, относительно папки расширения
-        const scriptPath = path.join(context.extensionPath, 'scripts', 'socketSendCommand.py');
+        const pathSocketSendMessage = path.join(context.extensionPath, 'scripts', 'socketSendMessage.py');
 
         // Использование сохраненного пути к Python интерпретатору Blender
         const pathExecPython = context.globalState.get<string>('pathExecPython');
@@ -170,8 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Формирование строки для дальнейшего запуска в exec. Тут python + пути в качестве аргументов
-        // const command = `${pathExecPython} "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
-        const command = `"${pathExecPython}" "${scriptPath}" "${pathPyFile}" "${pathWorkspace}"`;
+        const command = `"${pathExecPython}" "${pathSocketSendMessage}" "${pathWorkspace}" "${pathPyFile}"`;
 
         // Если вывод слишком большой, стоит использовать childProcess.spawn или настроить параметр maxBuffer
         childProcess.exec(command, (err, stdout, stderr) => {
@@ -222,7 +219,7 @@ export function activate(context: vscode.ExtensionContext) {
         // console.log(pathCurrPyFile);
 
         if (typeof pathCurrPyFile === 'string' && typeof pathWorkspace === 'string') {
-            sendCommandToBlender(pathCurrPyFile, pathWorkspace);
+            sendCommandToBlender(pathWorkspace, pathCurrPyFile);
         } else {
             // Обработка случая, когда один из путей не определен
             // vscode.window.showErrorMessage('Не удалось получить путь к файлу скрипта или рабочей области. Возможно выбран не *.py файл', 'OK');
@@ -242,7 +239,7 @@ export function activate(context: vscode.ExtensionContext) {
         // console.log(pathInitFile);
 
         if (typeof pathInitFile === 'string' && typeof pathWorkspace === 'string') {
-            sendCommandToBlender(pathInitFile, pathWorkspace);
+            sendCommandToBlender(pathWorkspace, pathInitFile);
         } else {
             // Обработка случая, когда один из путей не определен
             // vscode.window.showErrorMessage('Не удалось получить путь к __init__ файлу или рабочей области');
