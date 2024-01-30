@@ -1,8 +1,7 @@
 import * as os from 'os';
-import * as fs from 'fs';
+import * as net from 'net';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as childProcess from 'child_process';
 
 
 
@@ -50,22 +49,32 @@ async function getPathsProject() {
 
 
 
-// Получаем версию Blender запуская исполняемый файл с аргументом --version и разбирается через регулярные выражения
-async function getBlenderVersion(pathExecBlender: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        childProcess.exec(`"${pathExecBlender}" --version`, (error, stdout, stderr) => {
-            if (error) {
-                reject(`Ошибка при получении версии Blender: ${error}`);
-                return;
-            }
-            const versionLine = stdout.split('\n')[0];
-            const versionMatch = versionLine.match(/Blender (\d+\.\d+)/);
-            if (versionMatch && versionMatch.length > 1) {
-                resolve(versionMatch[1]);
-            } else {
-                reject('Не удалось определить версию Blender.');
-            }
+
+// Клиент сетевого сокета для откправки путей в Blender
+// Async ненужен т.к. функции connect и wrtite уже асинхронные
+function sendCommandToBlender(pathWorkspace: string, pathPyFile: string) {
+    const client = new net.Socket();
+    // Указываем порт, на котором слушает ваш Python сервер
+    const port = 3264;
+    const host = 'localhost';
+
+    client.connect(port, host, () => {
+        console.log('Connected to Blender server');
+        const command = `${pathWorkspace}\n${pathPyFile}`;
+        client.write(command, 'utf-8', () => {
+            console.log('Command sent to Blender');
+            // Закрываем соединение после отправки
+            client.end();
         });
+    });
+
+    client.on('error', (err) => {
+        console.error('Connection error:', err);
+        vscode.window.showErrorMessage('Ошибка подключения к Blender');
+    });
+
+    client.on('close', () => {
+        console.log('Connection closed');
     });
 }
 
@@ -96,23 +105,10 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // Использование сохраненного пути к Python интерпретатору Blender
-        const pathExecPython = context.globalState.get<string>('pathExecPython');
-        if (!pathExecPython) {
-            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender');
-            return;
-        }
-
 
         let pathEnd;
         let pathBegin;
         const scriptServerSocket = path.join(context.extensionPath, 'scripts', 'socketBlenderBridge.py');
-
-        console.log('%cPython executable:', 'color: yellow');
-        // Получение последнего компонента пути и его покраска
-        pathEnd = path.basename(pathExecPython);
-        pathBegin = pathExecPython.slice(0, pathExecPython.lastIndexOf(pathEnd));
-        console.log(`%c${pathBegin}%c${pathEnd}`, 'color: normal', 'color: orange');
 
         console.log('%cBlender executable:', 'color: yellow');
         // Получение последнего компонента пути и его покраска
@@ -154,57 +150,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposableStart);
 
 
-
-    // Отправляем в Blender команду запуска проекта
-    async function sendCommandToBlender(pathWorkspace: string, pathPyFile: string) {
-        // Путь к скрипту откправки кода по сокету, относительно папки расширения
-        const pathSocketSendMessage = path.join(context.extensionPath, 'scripts', 'socketSendMessage.py');
-
-        // Использование сохраненного пути к Python интерпретатору Blender
-        const pathExecPython = context.globalState.get<string>('pathExecPython');
-        if (!pathExecPython) {
-            vscode.window.showErrorMessage('Необходимо указать путь к интерпретатору Python в Blender');
-            return;
-        }
-
-        // Формирование строки для дальнейшего запуска в exec. Тут python + пути в качестве аргументов
-        const command = `"${pathExecPython}" "${pathSocketSendMessage}" "${pathWorkspace}" "${pathPyFile}"`;
-
-        // Если вывод слишком большой, стоит использовать childProcess.spawn или настроить параметр maxBuffer
-        childProcess.exec(command, (err, stdout, stderr) => {
-            // err - содержит информацию об ошибке, возникшей во время выполнения команды
-            // stdout - это выхлоб самого запускаемого скрипта или программы во время выполнения
-            // stderr - стандартный поток ошибок команды, выводятся сообщения самой запускаемой программы
-
-            if (err) {
-                // Нельзя выводить логи в всплывающее табло, оно не выводится
-                // Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение
-                console.error('------------>>>> err <<<<------------');
-                console.error(err);
-
-                // Проверка на конкретное сообщение об ошибке
-                if (err.message && err.message.includes('ConnectionRefusedError')) {
-                    vscode.window.showErrorMessage('Ошибка подключения: конечный компьютер отверг запрос на подключение');
-                } else {
-                    // Вывод общего сообщения об ошибке
-                    vscode.window.showErrorMessage('Произошла ошибка, но я пока не знаю какая. Пожалуйста пришлите мне её в Issuie.');
-                }
-                return;
-            }
-            if (stdout) {
-                console.error('------------>>>> stdout <<<<------------');
-                console.error(stdout);
-                return;
-            }
-            if (stderr) {
-                vscode.window.showErrorMessage(`Ошибка stderr`);
-                console.error('------------>>>> stderr <<<<------------');
-                console.error(stderr);
-                return;
-            }
-            vscode.window.showInformationMessage(`Команда отправлена`);
-        });
-    }
 
 
     // Обработчик команды для запуска текущего скрипта
@@ -252,30 +197,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
-    // Выбор пути к blender и его Python интерпретатору
+    // Выбор пути к blender
     let disposablePathExecSel = vscode.commands.registerCommand('blendpybridge.pathExecSel', async () => {
 
         // Проверяем, запущен ли в данный момент терминал
         if (terminal) {
-            vscode.window.showWarningMessage('Нельзя изменять путь к Blender и Python, пока Blender запущен');
+            vscode.window.showWarningMessage('Нельзя изменять путь к Blender, пока он запущен');
             return;
         }
-
-        // Win
-        // \APP\blender-2.83.20-windows-x64\2.83\python\bin\python.exe
-        // \APP\blender-2.93.18-windows-x64\2.93\python\bin\python.exe
-        // \APP\blender-3.0.1  -windows-x64\3.0 \python\bin\python.exe
-        // \APP\blender-3.1.2  -windows-x64\3.1 \python\bin\python.exe
-        // \APP\blender-3.3.12 -windows-x64\3.3 \python\bin\python.exe
-        // \APP\blender-3.6.5  -windows-x64\3.6 \python\bin\python.exe
-        // \APP\blender-4.0.2  -windows-x64\4.0 \python\bin\python.exe
-
-        // Lin
-        // \blender-2.83.20-linux-x64\2.83\python\bin\python3.7m
-        // \blender-2.93.18-linux-x64\2.93\python\bin\python3.9
-        // \blender-3.3.15 -linux-x64\3.3 \python\bin\python3.10
-        // \blender-3.6.8  -linux-x64\3.6 \python\bin\python3.10
-        // \blender-4.0.2  -linux-x64\4.0 \python\bin\python3.10
 
         // 'win32' ? 'windows' : 'linux'
         const platform = os.platform();
@@ -315,53 +244,11 @@ export function activate(context: vscode.ExtensionContext) {
 
             // Проверяем, начинается ли имя файла с 'blender' или 'blender.exe' для различных ОС
             if ((platform === "win32" && fileName === "blender.exe") || (platform !== "win32" && fileName.startsWith("blender"))) {
-
-                // Опеределяем версию Blender
-                let blenderVersion;
-                try {
-                    blenderVersion = await getBlenderVersion(pathExecBlender);
-                    console.log(`Определена версия Blender: ${blenderVersion}`);
-                    // Если getBlenderVersion успешно выполнилась, значит, выбранный файл вероятно является Blender
-                    await context.globalState.update('pathExecBlender', pathExecBlender);
-                } catch (error) {
-                    vscode.window.showErrorMessage("Произошла ошибка при определении версии Blender.");
-                    return;
-                }
-                
-                // Папка выбранного файла
-                let blenderBasePath = path.dirname(pathExecBlender);
-                // console.log(`Имя директории: ${blenderBasePath}`);
-                // Формирование пути к Python директории Blender-а
-                const pythonDir = path.join(blenderBasePath, `${blenderVersion}`, 'python', 'bin');
-                // console.log(`Путь к директории Python: ${pythonDir}`);
-
-                // Существует ли ожидаемый путь до папки с python интерпретатором
-                if (!fs.existsSync(pythonDir)) {
-                    vscode.window.showErrorMessage('Не найдена директория Python для данной версии Blender');
-                    return;
-                }
-
-                let pathExecPython;
-                // Формирование пути к Python интерпретатору Blender-а в завимости от особеннсоей систем и версий Blender для них
-                if (platform === "win32") {
-                    pathExecPython = path.join(pythonDir, 'python.exe');
-                } else {
-                    const files = fs.readdirSync(pythonDir);
-                    const pythonExec = files.find(file => file.startsWith('python'));
-                    pathExecPython = pythonExec ? path.join(pythonDir, pythonExec) : null;
-                }
-
-                // Проверка существования файла Python по собранному пути
-                if (pathExecPython && fs.existsSync(pathExecPython)) {
-                    await context.globalState.update('pathExecPython', pathExecPython);
-                    vscode.window.showInformationMessage(`Blender path selected:\n${pathExecBlender}`);
-                    vscode.window.showInformationMessage(`Python path: ${pathExecPython}`);
-                } else {
-                    vscode.window.showErrorMessage('Не найден интерпретатор Python для данной версии Blender');
-                }
-
+                // Прерываем асинхронность и запсиываем переменную в глобальное пространство VS Code
+                await context.globalState.update('pathExecBlender', pathExecBlender);
+                vscode.window.showInformationMessage(`Blender path selected:\n${pathExecBlender}`);
             } else {
-                vscode.window.showErrorMessage("Выбранный файл не соответствует ожидаемому названию исполняемого файла Blender.");
+                vscode.window.showErrorMessage(`Выбранный файл не соответствует ожидаемому имени. Ожидается "blender" для Unix или "blender.exe" для Windows.`);
             }
 
         } else {
@@ -402,15 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Вывод в\о всплывающие окошки путей к Blender и к Python
     let disposablePathExecShow = vscode.commands.registerCommand('blendpybridge.pathExecShow', async () => {
         // Получение путей из глобального пространства переменных из VS Code
-        const pathExecPython = context.globalState.get<string>('pathExecPython');
         const pathExecBlender = context.globalState.get<string>('pathExecBlender');
-
-        if (pathExecPython) {
-            vscode.window.showInformationMessage(`Текущий путь Python: ${pathExecPython}`, 'OK');
-            
-        } else {
-            vscode.window.showWarningMessage(`Текущий путь Python не определен`);
-        }
 
         if (pathExecBlender) {
             vscode.window.showInformationMessage(`Текущий путь Blender: ${pathExecBlender}`, 'OK');
@@ -451,12 +330,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposableShowPathsProject);
 
 
-
 }
+
 
 
 
 // Функция, срабатывающая при деактивации аддона
 export function deactivate() {}
-
-

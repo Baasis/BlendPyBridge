@@ -2,8 +2,8 @@
     "command.startBlender.title": "Start Blender with socket server",
     "command.pathExecSel.title": "Select Blender Executable",
     "command.pathExecClean.title": "Clean Path Blender",
-    "command.pathExecShow.title": "Print Path Blender & Python",
-    "command.showPathsProject.title": "Show Paths Project",
+    "command.pathExecShow.title": "Print path Blender",
+    "command.showPathsProject.title": "Show paths Project",
     "command.runCurrScript.title": "Run the current script in Blender",
     "command.runEntirePackage.title": "Run the entire package in Blender"
   }

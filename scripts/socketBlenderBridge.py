@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import socket
+import importlib
 import threading
 
 import bpy
@@ -16,7 +17,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.append(script_dir)
 
-# from utils_reg import UNregister
+from utils_reg import UNregister
 
 
 
@@ -52,14 +53,13 @@ def blExec(message):
     # Для учитывания вложенности запускаемого файла относительно корня
     path_package = os.path.basename(path_dir)
 
-
     # Определение типа запуска - скрипт/аддон
     if path_dir == pathWorkspace and name_file == '__init__.py':
         print('Это __init__.py основного пакета')
 
         # Разрегистрация старой версии аддона
         # classes_to_remove = UNregister(path_package)
-        # UNregister(path_package)
+        UNregister(path_package)
 
         # Потом можно удалять старый путь из sys.path
         # add_sys_path = add_path_package(path_workspace)
@@ -86,18 +86,37 @@ def blExec(message):
         sys.exit(0)
 
 
+
+
     # Словарь переменных для эмуляции переменных скрипта/аддона
-    exec_variables = {
-        '__file__'   : pathPyFile,
-        # Для скрипта и пакета ???
-        '__name__'   : '__main__',
-        '__package__': path_package,
-        # 'DEBUG_MODE' : None,
-    }
+
+    # print(__name__) - при установке аддона
+
+    # __init__
+    # __name__ = package_name
+    # __package__ = package_name
+
+    # import_module
+    # __name__ = package_name.module_name
+    # __package__ = package_name
+    
+    # Blender умеет отслеживать в аддонах строку '__name__' == '__main__' и игнорить её
+
+    # exec_variables = {
+    #     '__file__'   : pathPyFile,
+    #     # Для скрипта и пакета ???
+    #     '__name__'   : '__main__',
+    #     '__package__': path_package,
+    #     # 'DEBUG_MODE' : None,
+    # }
 
 
-    with open(pathPyFile) as f:
-        code = f.read()
+
+
+
+
+    # with open(pathPyFile) as f:
+        # code = f.read()
         # init_path типо имя файла на случай вызова ошибки 
         # codepile = compile(code, 'init_path', 'exec')
 
@@ -107,6 +126,8 @@ def blExec(message):
     # exec(code, exec_variables)
     # exec(codepile, exec_variables)
 
+    # Пробуем запуск проекта через Import
+    module = importlib.import_module(path_package)
 
     print('Отработано')
     # После выполнения exec, функция register должна быть доступна в exec_variables
