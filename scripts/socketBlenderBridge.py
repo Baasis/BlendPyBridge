@@ -42,6 +42,7 @@ class Color:
 
 
 def blExec(message):
+    print(f'{Color.ORANGE}def blExec(message){Color.RESET}')
     # Полученные от клиента пути для запуска проекта
     pathWorkspace, pathPyFile = message.split('\n')
     
@@ -122,14 +123,14 @@ def blExec(message):
 
 
     # Запуск/перезапуск проекта
-    print('Запуск проекта')
+    print(f'{Color.YELLOW}Запуск проекта{Color.RESET}')
     # exec(code, exec_variables)
     # exec(codepile, exec_variables)
 
     # Пробуем запуск проекта через Import
     module = importlib.import_module(path_package)
 
-    print('Отработано')
+    print(f'{Color.YELLOW}Отработано{Color.RESET}')
     # После выполнения exec, функция register должна быть доступна в exec_variables
     # Если main != name ???
     # if 'register' in exec_variables:
