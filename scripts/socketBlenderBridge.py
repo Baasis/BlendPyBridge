@@ -11,7 +11,6 @@ import threading
 import bpy
 
 
-
 # Добавляем директорию скрипта в sys.path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
@@ -41,8 +40,35 @@ class Color:
 
 
 
+# Запуск/перезапуск проекта
+def start_project(package_name):
+    print(f'{Color.YELLOW}Запуск проекта{Color.RESET}')
+
+    # Запускаем проект через его Import
+    module = importlib.import_module(package_name)
+    
+    # __name__ пакета будет именем пакета, __name__ != "__main__"
+    # Вызываем функцию 'register' из импортированного модуля
+    if hasattr(module, 'register'):
+        module.register()
+    else:
+        print("Функция 'register' не найдена в модуле")
+
+    print(f'{Color.YELLOW}Отработано{Color.RESET}')
+
+
+
+# Пока не создан полный разрегистратор, без перезапуска, то нет смысла удалять путь из sys.path
+# Так как я только при запуске могу могу использовать и посути выгружу и тут же загружу
+# Это бессмысленно и я буду меша логику перезапускатора с разрегистратором
+def path_append_to_syspath(added_path):
+    if added_path not in sys.path:
+        sys.path.append(added_path)
+
+
 def blExec(message):
-    print(f'{Color.ORANGE}def blExec(message){Color.RESET}')
+    print(f'\n{Color.GREEN}#### Вжух вжух, это магия ####{Color.RESET}')
+    print(f'\n{Color.ORANGE} * def blExec(message){Color.RESET}')
     # Полученные от клиента пути для запуска проекта
     pathWorkspace, pathPyFile = message.split('\n')
     
@@ -50,95 +76,49 @@ def blExec(message):
     # path/to/folder and name_file.py
     path_dir, name_file = os.path.split(pathPyFile)
 
-    # Полученное имя является именем пакета для exec_variables,
-    # Для учитывания вложенности запускаемого файла относительно корня
-    path_package = os.path.basename(path_dir)
 
     # Определение типа запуска - скрипт/аддон
     if path_dir == pathWorkspace and name_file == '__init__.py':
         print('Это __init__.py основного пакета')
-
+        
+        # Полученное имя является именем пакета для,
+        # Для учитывания вложенности запускаемого файла относительно корня
+        module_name = os.path.basename(path_dir)
+        
         # Разрегистрация старой версии аддона
-        # classes_to_remove = UNregister(path_package)
-        UNregister(path_package)
-
-        # Потом можно удалять старый путь из sys.path
-        # add_sys_path = add_path_package(path_workspace)
+        UNregister(module_name)
 
         # Добавляем root каталог проекта в sys.path
         # С точки зрения Blender нужно указать не папку с проектом,
         # а root каталог в котором находится каталог проекта
         path_to_add = os.path.dirname(pathWorkspace)
-        if path_to_add not in sys.path:
-            # .../DevCave/my_project
-            sys.path.append(path_to_add)
-        # Сделать удаления из sys.path
+        path_append_to_syspath(path_to_add)
+        # print(*sys.path, sep='\n')
+
+        # Старт проекта
+        start_project(module_name)
+
 
     elif name_file.endswith('.py'):
+        print(f'Это самостоятельный скрипт: {name_file}')
 
-        if name_file == '__init__.py':
-            print('Обрабатываем __init__.py подмодуля как обычный скрипт')
-        else:
-            print(f'Это самостоятельный скрипт: {name_file}')
-        # Здесь не добавляем путь в sys.path, т.к. у скриптов нет относительных импортов
-        # Относиительные импорты работают только с пакетами, но вооще python добавляет
+        # Имя файла без расширения
+        module_name = os.path.splitext(name_file)[0]
+
+        # Разрегистрация старой версии аддона
+        UNregister(module_name)
+        
+        # Добавляем путь к директории скрипта
+        # path_append_to_syspath(path_dir)
+        path_append_to_syspath(path_dir)
+        # print(*sys.path, sep='\n')
+
+        # Старт скрипта
+        start_project(module_name)
+
     else:
         print('Ошибка: Это не *.py файл')
         sys.exit(0)
-
-
-
-
-    # Словарь переменных для эмуляции переменных скрипта/аддона
-
-    # print(__name__) - при установке аддона
-
-    # __init__
-    # __name__ = package_name
-    # __package__ = package_name
-
-    # import_module
-    # __name__ = package_name.module_name
-    # __package__ = package_name
-    
-    # Blender умеет отслеживать в аддонах строку '__name__' == '__main__' и игнорить её
-
-    # exec_variables = {
-    #     '__file__'   : pathPyFile,
-    #     # Для скрипта и пакета ???
-    #     '__name__'   : '__main__',
-    #     '__package__': path_package,
-    #     # 'DEBUG_MODE' : None,
-    # }
-
-
-
-
-
-
-    # with open(pathPyFile) as f:
-        # code = f.read()
-        # init_path типо имя файла на случай вызова ошибки 
-        # codepile = compile(code, 'init_path', 'exec')
-
-
-    # Запуск/перезапуск проекта
-    print(f'{Color.YELLOW}Запуск проекта{Color.RESET}')
-    # exec(code, exec_variables)
-    # exec(codepile, exec_variables)
-
-    # Пробуем запуск проекта через Import
-    module = importlib.import_module(path_package)
-
-    print(f'{Color.YELLOW}Отработано{Color.RESET}')
-    # После выполнения exec, функция register должна быть доступна в exec_variables
-    # Если main != name ???
-    # if 'register' in exec_variables:
-    #     register_func = exec_variables['register']
-    #     register_func()
-    # else:
-    #     print('Функция register не найдена')
-
 
 
 
@@ -187,6 +167,8 @@ def handle_client(client_sock):
         # После получения всех частей кода и его заупска - закрываем соединение
         client_sock.close()
         print(f'{Color.YELLOW}Соединение закрыто{Color.RESET}')
+
+
 
 
 # Собственно сам слушайющий сервер
