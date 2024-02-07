@@ -1,4 +1,5 @@
 {
+	"blendpybridge.description": "Удобная разработка скриптов и аддонов для Blender с помощью VS Code.",
 	"command.startBlender.title": "Запустить Blender с сокет сервером",
 	"command.pathExecSel.title": "Выбрать исполняемый файл Blender",
 	"command.pathExecClean.title": "Очистить путь к Blender",

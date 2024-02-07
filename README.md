@@ -95,4 +95,24 @@
 
 Получится файл вида `blendpybridge-2401.21.1.vsix` готовый к установке в VS Code или пубикации в маркетплейсе.
 
+[Публикация в маркетплейсе](https://code.visualstudio.com/api/working-with-extensions/publishing-extension "Официальная документация по оформлению и публикации своего расширения") через терминал происходит командой  
+`vsce publish`
+
+Предварительно нужно оформиться на площадке и залогиниться через терминал под своим ID  
+`vsce login <publisher_id>`
+
+## Да пребудет в вашей разработке `Biggus Dickus`  
+
+<!-- ![Пример GIF](https://media.tenor.com/ETlZ8bCgbvwAAAAC/blender-community-cube.gif) -->
+
+<!-- Загрузка в обложку -->
+<!-- [![Watch the video](https://i.stack.imgur.com/Vp2cE.png/)](https://www.youtube.com/watch?v=kx_G2a2hL6U) -->
+<!-- Автостарт -->
+[![Watch the video](https://img.youtube.com/vi/kx_G2a2hL6U/hqdefault.jpg)](https://www.youtube.com/watch?v=kx_G2a2hL6U)
+
+<!-- [![Watch the video](https://img.youtube.com/vi/kx_G2a2hL6U/hqdefault.jpg)](https://www.youtube.com/embed/kx_G2a2hL6U) -->
+
+<!-- [<img src="https://img.youtube.com/vi/kx_G2a2hL6U/hqdefault.jpg" width="400" height="300"
+/>](https://www.youtube.com/embed/kx_G2a2hL6U) -->
+
 ---

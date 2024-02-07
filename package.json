@@ -1,12 +1,12 @@
 {
   "name": "blendpybridge",
   "displayName": "BlendPyBridge",
-  "description": "Удобная разработака скриптов и аддонов для Blender с помощью VS Code.",
+  "description": "%blendpybridge.description%",
   "author": {
     "name": "Andrei Zhitkov - Baasis - Andy"
   },
   "publisher": "BaasiS",
-  "version": "2402.6.0",
+  "version": "2402.7.0",
   "engines": {
     "vscode": "^1.84.0"
   },

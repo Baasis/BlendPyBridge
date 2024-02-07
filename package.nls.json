@@ -1,4 +1,5 @@
 {
+    "blendpybridge.description": "Convenient scripting and addon development for Blender using VS Code.",
     "command.startBlender.title": "Start Blender with socket server",
     "command.pathExecSel.title": "Select Blender Executable",
     "command.pathExecClean.title": "Clean Path Blender",
